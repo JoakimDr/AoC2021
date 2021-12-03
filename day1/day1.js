@@ -9,23 +9,13 @@ try {
   console.log("Error:", e.stack);
 }
 
-//part1;
-var numberOfDepthIncreases = 0;
+var anotherCount = 0;
+
 var oldDepth = 0;
-var Depth = 0;
-var i = 0;
-while (i < inputData.length) {
-  Depth = inputData[i];
-  if (i > 0 && Depth > oldDepth) {
-    numberOfDepthIncreases++;
+for (let x = 1; x < inputData.length; ++x) {
+  if (inputData[x] >= inputData[x - 1]) {
+    anotherCount++;
   }
-
-  console.log(`rows: ${i}`);
-  console.log(`depth ${Depth} old depth ${oldDepth}`);
-  console.log(`number of depth increases ${numberOfDepthIncreases}`);
-
-  oldDepth = inputData[i];
-  i++;
 }
 
-console.log(`depth increases : ${numberOfDepthIncreases}`);
+console.log(anotherCount);
