@@ -1,16 +1,7 @@
-//const { sign } = require("crypto");
 var fs = require('fs');
 const { exit } = require('process');
 
-// var inputData = [];
-// try {
-//   var data = fs.readFileSync("day3/input.txt", "utf8");
-//   inputData = data.split(/\r?\n/);
-// } catch (e) {
-//   console.log("Error:", e.stack);
-// }
-let input = fs.readFileSync('./day4/sampleinput.txt', 'utf8').split(/\r?\n/);
-var hitInput = fs.readFileSync('./day4/hittray.txt', 'utf8').split(/\r?\n/);
+let input = fs.readFileSync('./day4/input.txt', 'utf8').split(/\r?\n/);
 
 // row 1 = bingo numbers
 //row 2-end bingo trays
@@ -34,12 +25,12 @@ function getTrays(input) {
 
 function checkBingo(tray) {
   let cols = [
-    [0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0],
-    [0, 0, 0, 0, 0],
-  ];
+    [0, 0, 0, 0, 0].slice(),
+    [0, 0, 0, 0, 0].slice(),
+    [0, 0, 0, 0, 0].slice(),
+    [0, 0, 0, 0, 0].slice(),
+    [0, 0, 0, 0, 0].slice(),
+  ].slice();
 
   //check rows
   var bingoRow = [1, 1, 1, 1, 1];
@@ -71,7 +62,7 @@ function sumUnmarkedNumbers(bingoTray, hitTray) {
   let sum = 0;
   for (row = 0; row < bingoTray.length; row++) {
     for (col = 0; col < bingoTray[row].length; col++) {
-      if (hitTray[row][col] === 1) {
+      if (parseInt(hitTray[row][col]) === 0) {
         sum += parseInt(bingoTray[row][col]);
       }
     }
@@ -80,18 +71,33 @@ function sumUnmarkedNumbers(bingoTray, hitTray) {
   return sum;
 }
 
+function getNewHitTray() {
+  const hitTrayRow = [0, 0, 0, 0, 0];
+
+  const hitTrayTemplate = [
+    hitTrayRow.slice(),
+    hitTrayRow.slice(),
+    hitTrayRow.slice(),
+    hitTrayRow.slice(),
+    hitTrayRow.slice(),
+  ];
+
+  return hitTrayTemplate.slice();
+}
+
 function part1(input) {
   var bingoTrays = getTrays(input);
-  var newHitTray = getTrays([...hitInput]);
+
   var hitTrays = [];
   for (let i = 0; i < bingoTrays.length; i++) {
-    hitTrays[i] = newHitTray[0];
+    hitTrays[i] = getNewHitTray();
   }
   console.log(bingoTrays);
   var bingo = false;
   var bingoNumberIndex = 0;
   var luckyTray = [];
   var luckyHitTray = [];
+  var luckyBingoNumber = 0;
 
   while (bingoNumberIndex < bingoNumbers.length && bingo === false) {
     bingoNumber = parseInt(bingoNumbers[bingoNumberIndex]);
@@ -111,6 +117,8 @@ function part1(input) {
               console.log(tray);
               luckyTray = bingoTrays[tray];
               luckyHitTray = hitTrays[tray];
+              luckyBingoNumber = bingoNumbers[bingoNumberIndex];
+
               break;
             }
           }
@@ -129,7 +137,7 @@ function part1(input) {
     bingoNumberIndex++;
   }
 
-  var luckyBingoNumber = bingoNumbers[bingoNumberIndex];
+  //  var luckyBingoNumber = bingoNumbers[bingoNumberIndex];
   console.log(`lucky bingo number ${luckyBingoNumber}`);
   console.log(`winning tray ${luckyTray}`);
   var luckySum = sumUnmarkedNumbers(luckyTray, luckyHitTray);
@@ -137,6 +145,55 @@ function part1(input) {
 }
 
 // part 2
-//function part2(inputData) {}
+function part2(inputData) {
+  var bingoTrays = getTrays(input);
 
-part1(input);
+  var hitTrays = [];
+  for (let i = 0; i < bingoTrays.length; i++) {
+    hitTrays[i] = getNewHitTray();
+  }
+  console.log(bingoTrays);
+  var bingo = false;
+  var bingoNumberIndex = 0;
+  var luckyTray = [];
+  var luckyHitTray = [];
+  var luckyBingoNumber = 0;
+  var winnerTrayIndexes = [];
+  while (bingoNumberIndex < bingoNumbers.length) {
+    bingoNumber = parseInt(bingoNumbers[bingoNumberIndex]);
+    console.log(`checking bingo number ${bingoNumber}`);
+    for (let tray = 0; tray < bingoTrays.length; tray++) {
+      console.log(`checking tray ${tray}`);
+      for (let row = 0; row < 5; row++) {
+        //        console.log(`checking row${row}`);
+        for (let pos = 0; pos < 5; pos++) {
+          //          console.log(`checking pos ${pos}`);
+          if (parseInt(bingoTrays[tray][row][pos]) === bingoNumber) {
+            console.log(`found hit on tray ${tray} row ${row} pos ${pos}`);
+            hitTrays[tray][row][pos] = 1;
+            bingo = checkBingo(hitTrays[tray]);
+            if (bingo) {
+              console.log(`tray number ${tray} won`);
+              console.log(tray);
+              winnerTrayIndexes.push(tray);
+              luckyBingoNumber = bingoNumbers[bingoNumberIndex];
+              break;
+            }
+          }
+        }
+      }
+    }
+    bingoNumberIndex++;
+  }
+
+  //  var luckyBingoNumber = bingoNumbers[bingoNumberIndex];
+  let uniqueItems = [...new Set(winnerTrayIndexes)];
+  console.log(`winner trayz ${uniqueItems}`);
+  console.log(`winner tray ${bingoTrays[uniqueItems.length - 1]}`);
+  luckyTray = bingoTrays[uniqueItems.length - 1];
+  luckyHitTray = hitTrays[uniqueItems.length - 1];
+  var luckySum = sumUnmarkedNumbers(luckyTray, luckyHitTray);
+  console.log(`part 2 answer is ${luckyBingoNumber * luckySum}`);
+}
+
+part2(input);
